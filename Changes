@@ -1,5 +1,14 @@
 Revision history for Perl extension Crypt::CipherSaber.
 
+1.00 Tue Jul 12 23:45:00 UTC 2005
+	- migrated to Build.PL
+	- added POD, POD coverage, and signature tests
+	- generated traditional Makefile.PL
+	- bumped up version number
+	- ported tests to Test::Simple
+	- bumped up test coverage
+	- updated README
+
 0.61  Sat May 25 17:31:52 UTC 2002
 	- avoid uninitialized value warnings in fh_crypt() 
 

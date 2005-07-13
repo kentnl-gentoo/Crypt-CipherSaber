@@ -1,11 +1,16 @@
-use Crypt::CipherSaber;
+#!perl -w
 
-print "1..1\n";
+BEGIN
+{
+	chdir 't' if -d 't';
+}
+
+use strict;
+use Test::More tests => 2;
+
+my $module = 'Crypt::CipherSaber';
+use_ok( $module );
 
 # first, try to create an object
-my $cs = Crypt::CipherSaber->new('first key') or die "not ok 2";
-if (defined($cs)) {
-	print "ok 1\n";
-} else {
-	print "not ok 1\n";
-}
+my $cs = $module->new('first key');
+isa_ok( $cs, $module );

@@ -1,0 +1,42 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.44.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 80bc94fb6bfcb7c680fb458b55e3b1301e19dc8d Build.PL
+SHA1 8153f68a5a4725476b3e5b1460b1bf6d8c0e9b17 Changes
+SHA1 a21beaa3ee715f216db0dd42b2a3984f02896c91 MANIFEST
+SHA1 c693376329238a7d4e66df3e5cadfbf8984271a5 META.yml
+SHA1 89badd63f031ee283647f7a60ac24c2bdad4724f Makefile.PL
+SHA1 01ab13d602962b3cece3ee21f4a94fa9f791089e README
+SHA1 195b43a0cf4205d20c39ec9ae3ccf131337fc3dd lib/Crypt/CipherSaber.pm
+SHA1 f35a25f9883738be60f36b3ec2d0aeae9e2a9608 t/0-signature.t
+SHA1 2a24fe5acc19ef82f476a2634856af8c4f02b479 t/CS2.t
+SHA1 77a9031ccfd49486409f119daa5048c34542a29c t/base.t
+SHA1 2bd8b8faa4768bb323a3de9d9d333854b7240d18 t/bigfile.t
+SHA1 c03dcb0143cb728fc51a5bade84fe0b60ed95fbe t/both_long.t
+SHA1 3c9c40b67a46f4cbaf129468dbd55690d9d935cd t/create.t
+SHA1 af740c6407da521170bf9ce67da5017d9952e41e t/encrypt.t
+SHA1 526a6f5c3b05ece813b6f2bb7baf0c12966d5f08 t/fh_encrypt.t
+SHA1 6da39b48ce64b584e4c3274bff96fc76ff484820 t/pod-coverage.t
+SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 t/pod.t
+SHA1 6e204f97d2188ca6f1c8548fc615e9a797a6dcd5 t/smiles.cs1
+SHA1 86ccaee51907f749d46bfba4ce5aa3ce9623ea7e t/smiles.png
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFC1HEbBd8Wn1wI6cQRAr/qAJ9GyiesUvi1bxn+uodxCHZBfnRTrQCdFNkI
+4dIIEEIP4prHtDe/WPZRux4=
+=swxm
+-----END PGP SIGNATURE-----

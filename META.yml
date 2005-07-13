@@ -1,0 +1,17 @@
+---
+name: Crypt-CipherSaber
+version: 1.00
+author:
+  - chromatic <chromatic@wgz.org>
+abstract: Perl module implementing CipherSaber encryption.
+license: perl
+requires:
+  Scalar::Util: ''
+build_requires:
+  Test::Simple: 0.60
+  Test::Warn: ''
+provides:
+  Crypt::CipherSaber:
+    file: lib/Crypt/CipherSaber.pm
+    version: 1.00
+generated_by: Module::Build version 0.2611

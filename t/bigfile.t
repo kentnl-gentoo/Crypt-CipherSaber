@@ -1,26 +1,25 @@
-# test to see if we can decrypt files via filehandles 
-# this tests for a subtle bug, ie, missing a modulo on $i
+#!perl -w
 
-use Crypt::CipherSaber;
-use File::Spec;
+BEGIN
+{
+	chdir 't' if -d 't';
+}
 
-print "1..1\n";
+use strict;
+use Test::More tests => 2;
 
-my $cs = new Crypt::CipherSaber ('sdrawkcabsihtdaeR');
-open(INPUT, File::Spec->catfile('t', 'smiles.cs1')) or die "Couldn't open: $!";
+use_ok( 'Crypt::CipherSaber' );
+
+my $cs = Crypt::CipherSaber->new( 'sdrawkcabsihtdaeR' );
+open( INPUT, 'smiles.cs1' ) or die "Couldn't open: $!";
 binmode(INPUT);
-open(OUTPUT, '>' . File::Spec->catfile('t', 'smiles.png')) 
-	or die "Couldn't open: $!";
+open(OUTPUT, '> smiles.png') or die "Couldn't open: $!";
 binmode(OUTPUT);
 $cs->fh_crypt(\*INPUT, \*OUTPUT);
 close INPUT;
 close OUTPUT;
 
-open(TEST, File::Spec->catfile('t', 'smiles.png')) or die "Couldn't open: $!";
+open(TEST, 'smiles.png') or die "Couldn't open: $!";
 my $line = <TEST>;
 
-if ($line =~ /PNG/) {
-	print "ok 1\n";
-} else {
-	print "not ok 1\n";
-}
+like( $line, qr/PNG/, 'Encrypting a large file should not mangle it' );

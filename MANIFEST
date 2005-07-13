@@ -1,13 +1,21 @@
+Build.PL
 Changes
 lib/Crypt/CipherSaber.pm
 Makefile.PL
 MANIFEST
+META.yml
 README
+SIGNATURE
+t/0-signature.t
 t/CS2.t
+t/base.t
 t/bigfile.t
 t/both_long.t
 t/create.t
 t/encrypt.t
 t/fh_encrypt.t
+t/pod.t
+t/pod-coverage.t
 t/smiles.cs1
 t/smiles.png
+SIGNATURE    Added here by Module::Build
