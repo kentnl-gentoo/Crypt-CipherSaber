@@ -6,7 +6,7 @@ BEGIN
 }
 
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 7;
 use_ok( 'Crypt::CipherSaber' );
 
 # tests the fh_crypt() method
@@ -113,6 +113,44 @@ while (<SOURCE>)
 }
 
 ok( ! $status, 'autogenerating and autoreading IV should also round-trip' );
+
+# IV retrieved from encrypted file can contain new-line characters. Check that
+# fh_encrypt can deal with it
+{
+	local $/ = "\012";
+
+	open( IN, 'smiles.png' )      or die "Cannot read smiles.png: $!";
+	open( OUT, '> smiles_2.cs1' ) or die "Cannot write to smiles_2.cs1: $!";
+	binmode( IN );
+	binmode( OUT );
+	$cs->fh_crypt( \*IN, \*OUT, $/ x 10 );
+	close IN;
+	close OUT;
+
+	open( IN, 'smiles_2.cs1'    ) or die "Cannot read smiles_2.cs1: $!";
+	open( OUT, '> smiles_2.png' ) or die "Cannot write to smiles_2.png $!";
+	binmode( IN );
+	binmode( OUT );
+	$cs->fh_crypt( \*IN, \*OUT );
+	close IN;
+	close OUT;
+
+	open( SOURCE, 'smiles.png' )   or die "Cannot read smiles.png: $!";
+	open( DEST,   'smiles_2.png' ) or die "Cannot read smiles_2.png: $!";
+	binmode SOURCE;
+	binmode DEST;
+	$status = 0;
+	while (<SOURCE>)
+	{
+		unless ($_ eq <DEST>)
+		{
+			$status = 1;
+			last;
+		}
+	}
+	ok( ! $status, 'IV with new-lines in the encrypted file' );
+}
+
 
 END
 {

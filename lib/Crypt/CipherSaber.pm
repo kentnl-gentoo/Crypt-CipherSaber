@@ -67,6 +67,15 @@ sub fh_crypt
         $iv = $self->_gen_iv() if length($iv) == 1;
         $self->_setup_key($iv);
         print OUT $iv;
+    } else {
+        if ( 10 != $in->read($iv, 10) )
+        {
+            require Carp;
+            Carp::carp( 'Could not read IV from input filehandle' );
+            return;
+        }
+        ( $iv ) = unpack( "a10", $iv );
+        $self->_setup_key($iv);
     }
 
     my $state = $self->[1];
@@ -75,11 +84,6 @@ sub fh_crypt
 
     while (<$in>)
     {
-        unless ($iv)
-        {
-            ( $iv, $_ ) = unpack( "a10a*", $_ );
-            $self->_setup_key($iv);
-        }
         my $line;
         ( $line, $state, @vars ) = _do_crypt( $state, $_, @vars );
         print OUT $line;
