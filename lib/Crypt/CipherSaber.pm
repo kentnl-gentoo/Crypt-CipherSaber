@@ -7,85 +7,85 @@ use Scalar::Util 'reftype';
 
 use vars '$VERSION';
 
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 sub new
 {
-	my ($class, $key, $N) = @_;
+    my ($class, $key, $N) = @_;
 
-	# CS-2 shuffles the state array N times, CS-1 once
-	if ( !( defined $N ) or ( $N < 1 ) )
-	{
-		$N = 1;
-	}
-	bless [ $key, [ 0 .. 255 ], $N ], $class;
+    # CS-2 shuffles the state array N times, CS-1 once
+    if ( !( defined $N ) or ( $N < 1 ) )
+    {
+        $N = 1;
+    }
+    bless [ $key, [ 0 .. 255 ], $N ], $class;
 }
 
 sub crypt
 {
-	my ($self, $iv, $message) = @_;
-	$self->_setup_key($iv);
+    my ($self, $iv, $message) = @_;
+    $self->_setup_key($iv);
 
-	my $state   = $self->[1];
-	my $output  = _do_crypt( $state, $message );
-	$self->[1] = [ 0 .. 255 ];
-	return $output;
+    my $state   = $self->[1];
+    my $output  = _do_crypt( $state, $message );
+    $self->[1]  = [ 0 .. 255 ];
+    return $output;
 }
 
 sub encrypt
 {
-	my $self = shift;
-	my $iv   = $self->_gen_iv();
-	return $iv . $self->crypt( $iv, @_ );
+    my $self = shift;
+    my $iv   = $self->_gen_iv();
+    return $iv . $self->crypt( $iv, @_ );
 }
 
 sub decrypt
 {
-	my $self = shift;
-	my ( $iv, $message ) = unpack( "a10a*", +shift );
-	return $self->crypt( $iv, $message );
+    my $self = shift;
+    my ( $iv, $message ) = unpack( "a10a*", +shift );
+    return $self->crypt( $iv, $message );
 }
 
 sub fh_crypt
 {
-	my ( $self, $in, $out, $iv ) = @_;
+    my ( $self, $in, $out, $iv ) = @_;
 
-	for my $glob ($in, $out)
-	{
-		my $reftype = reftype( $glob ) || '';
-		unless ($reftype eq 'GLOB')
-		{
-			require Carp;
-			Carp::carp( 'Non-filehandle passed to fh_crypt()' );
-			return;
-		}
-	}
+    for my $glob ($in, $out)
+    {
+        my $reftype = reftype( $glob ) || '';
+        unless ($reftype eq 'GLOB')
+        {
+            require Carp;
+            Carp::carp( 'Non-filehandle passed to fh_crypt()' );
+            return;
+        }
+    }
 
-	local *OUT = $out;
-	if ( defined($iv) )
-	{
-		$iv = $self->_gen_iv() if length($iv) == 1;
-		$self->_setup_key($iv);
-		print OUT $iv;
-	}
+    local *OUT = $out;
+    if ( defined($iv) )
+    {
+        $iv = $self->_gen_iv() if length($iv) == 1;
+        $self->_setup_key($iv);
+        print OUT $iv;
+    }
 
-	my $state = $self->[1];
+    my $state = $self->[1];
 
-	my ( $buf, @vars );
+    my ( $buf, @vars );
 
-	while (<$in>)
-	{
-		unless ($iv)
-		{
-			( $iv, $_ ) = unpack( "a10a*", $_ );
-			$self->_setup_key($iv);
-		}
-		my $line;
-		( $line, $state, @vars ) = _do_crypt( $state, $_, @vars );
-		print OUT $line;
-	}
-	$self->[1] = [ 0 .. 255 ];
-	return 1;
+    while (<$in>)
+    {
+        unless ($iv)
+        {
+            ( $iv, $_ ) = unpack( "a10a*", $_ );
+            $self->_setup_key($iv);
+        }
+        my $line;
+        ( $line, $state, @vars ) = _do_crypt( $state, $_, @vars );
+        print OUT $line;
+    }
+    $self->[1] = [ 0 .. 255 ];
+    return 1;
 }
 
 ###################
@@ -95,54 +95,54 @@ sub fh_crypt
 ###################
 sub _gen_iv
 {
-	my $iv;
-	for ( 1 .. 10 )
-	{
-		$iv .= chr( int( rand(256) ) );
-	}
-	return $iv;
+    my $iv;
+    for ( 1 .. 10 )
+    {
+        $iv .= chr( int( rand(256) ) );
+    }
+    return $iv;
 }
 
 sub _setup_key
 {
-	my $self   = shift;
-	my $key    = $self->[0] . shift;
-	my @key    = map { ord } split( //, $key );
-	my $state  = $self->[1];
-	my $j      = 0;
-	my $length = @key;
+    my $self   = shift;
+    my $key    = $self->[0] . shift;
+    my @key    = map { ord } split( //, $key );
+    my $state  = $self->[1];
+    my $j      = 0;
+    my $length = @key;
 
-	# repeat N times, for CS-2
-	for ( 1 .. $self->[2] )
-	{
-		for my $i ( 0 .. 255 )
-		{
-			$j += ( $state->[$i] + ( $key[ $i % $length ] ) );
-			$j %= 256;
-			( @$state[ $i, $j ] ) = ( @$state[ $j, $i ] );
-		}
-	}
+    # repeat N times, for CS-2
+    for ( 1 .. $self->[2] )
+    {
+        for my $i ( 0 .. 255 )
+        {
+            $j += ( $state->[$i] + ( $key[ $i % $length ] ) );
+            $j %= 256;
+            ( @$state[ $i, $j ] ) = ( @$state[ $j, $i ] );
+        }
+    }
 }
 
 sub _do_crypt
 {
-	my ( $state, $message, $i, $j, $n ) = @_;
+    my ( $state, $message, $i, $j, $n ) = @_;
 
-	my $output = '';
+    my $output = '';
 
-	for ( 0 .. ( length($message) - 1 ) )
-	{
-		$i++;
-		$i %= 256;
-		$j += $state->[$i];
-		$j %= 256;
-		@$state[ $i, $j ] = @$state[ $j, $i ];
-		$n = $state->[$i] + $state->[$j];
-		$n %= 256;
-		$output .= chr( $state->[$n] ^ ord( substr( $message, $_, 1 ) ) );
-	}
+    for ( 0 .. ( length($message) - 1 ) )
+    {
+        $i++;
+        $i %= 256;
+        $j += $state->[$i];
+        $j %= 256;
+        @$state[ $i, $j ] = @$state[ $j, $i ];
+        $n = $state->[$i] + $state->[$j];
+        $n %= 256;
+        $output .= chr( $state->[$n] ^ ord( substr( $message, $_, 1 ) ) );
+    }
 
-	return wantarray ? ( $output, $state, $i, $j, $n ) : $output;
+    return wantarray ? ( $output, $state, $i, $j, $n ) : $output;
 }
 
 1;
@@ -156,30 +156,32 @@ Crypt::CipherSaber - Perl module implementing CipherSaber encryption.
 =head1 SYNOPSIS
 
   use Crypt::CipherSaber;
-  my $cs = Crypt::CipherSaber->new('my pathetic secret key');
+  my $cs = Crypt::CipherSaber->new('my sad secret key');
 
-  my $coded = $cs->encrypt('Here is a secret message for you');
+  my $coded   = $cs->encrypt('Here is a secret message for you');
   my $decoded = $cs->decrypt($coded);
 
   # encrypt from and to a file
-  open(INFILE, 'secretletter.txt') or die "Can't open infile: $!";
-  open(OUTFILE, '>secretletter.cs1') or die "Can't open outfile: $!";
-  binmode(INFILE);
-  binmode(OUTFILE);
-  $cs->fh_crypt(\*INFILE, \*OUTFILE, 1);
+  open my $in,       'secretletter.txt' or die "Can't open infile: $!";
+  open my $out, '>', 'secretletter.cs1' or die "Can't open outfile: $!";
+  binmode $in;
+  binmode $out;
+
+  $cs->fh_crypt($in, $out, 1);
 
   # decrypt from and to a file
-  open(INFILE, 'secretletter.cs1') or die "Can't open infile: $!";
-  open(OUTFILE, '>secretletter.txt') or die "Can't open outfile: $!";
-  binmode(INFILE);
-  binmode(OUTFILE);
-  $cs->fh_crypt(\*INFILE, \*OUTFILE);
+  open my $in,       'secretletter.txt' or die "Can't open infile: $!";
+  open my $out, '>', 'secretletter.cs1' or die "Can't open outfile: $!";
+
+  binmode $in;
+  binmode $out;
+  $cs->fh_crypt($in, $out);
 
 =head1 DESCRIPTION
 
 The Crypt::CipherSaber module implements CipherSaber encryption, described at
 L<http://ciphersaber.gurus.com/>.  It is simple, fairly speedy, and relatively
-secure algorithm based on RC4.
+secure algorithm based on RC4. I<Relatively>, given RC4.
 
 Encryption and decryption are done based on a secret key, which must be shared
 with all intended recipients of a message.
@@ -231,13 +233,12 @@ the encryption tends to be.  On some operating systems, you can read from
 F</dev/random>.  Other approaches are the L<Math::TrulyRandom> module, or
 compressing a file, removing the headers, and compressing it again.
 
-=item B<fh_crypt(\*INPUT, \*OUTPUT, ($iv))>
+=item B<fh_crypt( $in_fh, $out_fh, ($iv))>
 
-For the sake of efficiency, Crypt::CipherSaber can filehandles.  It's not super
-brilliant, but it's relatively fast and sane.  Pass in a reference to the input
-file handle and the output filehandle.  If your platform needs to use
-C<binmode()>, this is your responsibility.  It is also your responsibility to
-close the files.
+For the sake of efficiency, Crypt::CipherSaber can operate on filehandles.
+It's not super brilliant, but it's relatively fast and sane.  If your platform
+needs to use C<binmode()>, this is your responsibility.  It is also your
+responsibility to close the files.
 
 You may also pass in an optional third parameter, an IV.  There are three
 possibilities here.  If you pass no IV, C<fh_crypt()> will pull the first ten
@@ -250,20 +251,20 @@ you.  This corresponds to an encryption.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2000 - 2001, 2005 chromatic
+Copyright (C) 2000 - 2015 chromatic
 
 This library is free software; you can use, modify, and redistribute it under
-the same terms as Perl 5.8.x itself.
+the same terms as Perl 5.20.x itself.
 
 =head1 AUTHOR
 
-chromatic C<< chromatic at wgz dot org >>
+chromatic C<< chromatic at cpan dot org >>
 
 thanks to jlp for testing, moral support, and never fearing the icky details
-and to the fine folks at http://perlmonks.org/.
+and to the fine folks at PerlMonks L<http://perlmonks.org/>.
 
-Additional thanks to Olivier Salaun and the Sympa project (http://www.sympa.org)
-for testing.
+Additional thanks to Olivier Salaun and the Sympa project
+L<http://www.sympa.org> for testing.
 
 =head1 SEE ALSO
 
